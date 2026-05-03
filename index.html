@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Free Invoice Generator</title>
+<meta name="description" content="Free invoice generator. Create invoices online instantly. No login required. Download PDF invoices in seconds.">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  justify-content:center;
+  padding:40px;
+}
+
+.card{
+  background:#111827;
+  padding:20px;
+  border-radius:12px;
+  width:700px;
+}
+
+.input{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  background:#0b1220;
+  border:1px solid #334155;
+  color:white;
+  border-radius:8px;
+}
+
+.item{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:5px;
+}
+
+.btn{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#38bdf8;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+a{color:#38bdf8;text-decoration:none}
+
+#nav{
+  margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="nav">
+  <a href="index.html">Invoice Generator</a> |
+  <a href="templates.html">Templates</a> |
+  <a href="how-to-create-invoice.html">How to</a> |
+  <a href="faq.html">FAQ</a>
+</div>
+<h1>Invoice Generator</h1>
+
+<div id="invNum"></div>
+
+<input class="input" id="invoiceTitle" placeholder="Invoice title (INVOICE / RAČUN / FACTURA)">
+<input class="input" id="invoiceNumber" placeholder="Invoice number (optional)">
+
+<input class="input" id="from" placeholder="From">
+<input class="input" id="to" placeholder="To">
+<input class="input" id="tax" placeholder="Tax %">
+
+<select class="input" id="currency">
+  <option value="€">EUR</option>
+  <option value="$">USD</option>
+  <option value="£">GBP</option>
+  <option value="¥">JPY</option>
+  <option value="¥">CNY</option>
+</select>
+
+<h3>Items</h3>
+<div id="items"></div>
+
+<button class="btn" onclick="addItem()">Add Item</button>
+
+<div id="total">Total: 0</div>
+
+<button class="btn" onclick="generate()">Generate PDF</button>
+
+</div>
+
+<script>
+
+let counter = localStorage.getItem("invCounter") || 1;
+let template = localStorage.getItem("invoiceTemplate") || "stripe";
+
+function updateInv(){
+  const manual=document.getElementById("invoiceNumber").value;
+  document.getElementById("invNum").innerText =
+    manual ? manual : "INV-" + String(counter).padStart(4,'0');
+}
+document.getElementById("invoiceNumber").oninput = updateInv;
+updateInv();
+
+function addItem(){
+  const d=document.createElement("div");
+  d.className="item";
+  d.innerHTML=`
+    <input class="input desc" placeholder="desc">
+    <input class="input qty" type="number" value="1">
+    <input class="input price" placeholder="price">
+  `;
+  document.getElementById("items").appendChild(d);
+}
+
+function generate(){
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const title=document.getElementById("invoiceTitle").value||"INVOICE";
+  const manual=document.getElementById("invoiceNumber").value;
+  const invoiceNo=manual||("INV-"+String(counter).padStart(4,'0'));
+
+  const from=document.getElementById("from").value;
+  const to=document.getElementById("to").value;
+  const tax=+document.getElementById("tax").value||0;
+  const currency=document.getElementById("currency").value;
+
+  let y=20, subtotal=0;
+
+  if(template==="stripe"){
+    doc.setFillColor(15,23,42);
+    doc.rect(0,0,210,35,"F");
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(18);
+    doc.text(title,20,20);
+  } else {
+    doc.setFontSize(18);
+    doc.text(title,20,y);
+  }
+
+  y+=15;
+  doc.setTextColor(0);
+
+  doc.text(invoiceNo,160,y);
+  y+=10;
+
+  doc.text("From: "+from,20,y);
+  y+=8;
+  doc.text("To: "+to,20,y);
+  y+=10;
+
+  doc.line(20,y,190,y);
+  y+=10;
+
+  document.querySelectorAll(".item").forEach(i=>{
+    const d=i.querySelector(".desc").value;
+    const q=+i.querySelector(".qty").value;
+    const p=+i.querySelector(".price").value;
+
+    const t=q*p;
+    subtotal+=t;
+
+    doc.text(d,20,y);
+    doc.text(String(q),110,y);
+    doc.text(currency+p.toFixed(2),140,y);
+    doc.text(currency+t.toFixed(2),170,y);
+
+    y+=8;
+  });
+
+  const taxA=subtotal*(tax/100);
+  const total=subtotal+taxA;
+
+  y+=10;
+  doc.line(120,y,190,y);
+  y+=10;
+
+  doc.text("Subtotal",120,y);
+  doc.text(currency+subtotal.toFixed(2),170,y);
+  y+=6;
+
+  doc.text("Tax",120,y);
+  doc.text(currency+taxA.toFixed(2),170,y);
+  y+=6;
+
+  doc.text("Total",120,y);
+  doc.text(currency+total.toFixed(2),170,y);
+
+  doc.save(invoiceNo+".pdf");
+
+  counter++;
+  localStorage.setItem("invCounter",counter);
+}
+
+addItem();
+
+</script>
+
+</body>
+</html>

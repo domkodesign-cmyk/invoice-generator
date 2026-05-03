@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Templates</title>
+
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:white}
+.container{max-width:900px;margin:auto;padding:40px}
+.nav a{color:#38bdf8;margin-right:10px;text-decoration:none}
+.card{background:#111827;padding:15px;margin:10px 0;border-radius:10px;cursor:pointer}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="nav">
+  <a href="index.html">Invoice Generator</a> |
+  <a href="templates.html"> Templates</a> | 
+  <a href="how-to-create-invoice.html"> How to</a> | 
+  <a href="faq.html">FAQ</a>
+</div>
+
+<h1>Choose Template</h1>
+
+<div class="card" onclick="set('stripe')">Stripe Style</div>
+<div class="card" onclick="set('minimal')">Minimal</div>
+<div class="card" onclick="set('classic')">Classic</div>
+
+</div>
+
+<script>
+function set(t){
+  localStorage.setItem("invoiceTemplate",t);
+  location.href="/index.html";
+}
+</script>
+
+</body>
+</html>
