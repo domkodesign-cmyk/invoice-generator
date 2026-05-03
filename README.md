@@ -2,7 +2,7 @@
 
 A lightweight, browser-based invoice generator with PDF export, templates, tax support, and multi-currency options.
 
-👉 Live demo: https://YOUR-USERNAME.github.io/invoice-generator/
+👉 Live demo: https://domkodesign-cmyk.github.io/invoice-generator/
 
 ---
 
